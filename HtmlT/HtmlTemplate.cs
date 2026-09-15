@@ -4,21 +4,22 @@ using DoctypeHtml.Parser;
 
 namespace HtmlT;
 
-public record Component(string Content);
+public record Component(string Content, Dictionary<string, Component> Children);
 
-public record HtmlTemplate(Dictionary<string, Component> Components)
+
+public sealed class HtmlTemplate()
 {
-    public string Render(string page)
+    public string Render(Component page)
     {
-        var output = new StringBuilder(page.Length * 2);
-        Tokenizer.Run(page.AsMemory(), t => output.Append(TokenToString(t)));
+        var output = new StringBuilder(page.Content.Length * 2);
+        Tokenizer.Run(page.Content.AsMemory(), t => output.Append(TokenToString(page, t)));
         return output.ToString();
     }
 
-    private string TokenToString(Token token) => token switch
+    private string TokenToString(Component component, Token token) => token switch
     {
         DoctypeToken doctype => $"<!DOCTYPE {doctype.Name}>",
-        StartTagToken startTag => startTag.SelfClosing ? SelfClosingTagToString(startTag) : $"<{startTag.Name}>",
+        StartTagToken startTag => startTag.SelfClosing ? SelfClosingTagToString(component, startTag) : $"<{startTag.Name}>",
         EndTagToken endTag => $"</{endTag.Name}>",
         CharacterToken character => $"{character.Character}",
         CommentToken comment => $"<!--{comment.Data}-->",
@@ -26,15 +27,6 @@ public record HtmlTemplate(Dictionary<string, Component> Components)
         var unknown => throw new NotImplementedException($"Token is not supported: {unknown}"),
     };
 
-    private string SelfClosingTagToString(StartTagToken token) => Components.TryGetValue(token.Name, out var component)
-        ? component.Content
-        : $"<{token.Name} />";
-
-    public class Builder
-    {
-        private readonly Dictionary<string, Component> _components = [];
-
-        public Builder AddComponent(string name, Component component) { _components[name] = component; return this; }
-        public HtmlTemplate Build() => new(_components);
-    }
+    private string SelfClosingTagToString(Component component, StartTagToken token)
+        => component.Children.TryGetValue(token.Name, out var found) ? Render(found) : $"<{token.Name} />";
 }

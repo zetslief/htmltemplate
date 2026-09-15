@@ -1,5 +1,5 @@
+using System.ComponentModel;
 using System.Text;
-using DoctypeHtml.Parser;
 
 namespace HtmlT.Tests;
 
@@ -21,10 +21,12 @@ public class BasicTests
     public async Task BasicComponent()
     {
         var builder = new StringBuilder(BasicHtml.Length + ComponentExample.Length);
-        var template = new HtmlT.HtmlTemplate.Builder()
-            .AddComponent("htmlt-component-example", new HtmlT.Component(ComponentExample))
-            .Build();
-        var page = template.Render(BasicHtml);
+        var rootComponent = new HtmlT.Component(BasicHtml, new Dictionary<string, Component>
+        {
+            { "htmlt-component-example", new Component(ComponentExample, []) },
+        });
+        var htmlTemplate = new HtmlT.HtmlTemplate();
+        var page = htmlTemplate.Render(rootComponent);
         Console.WriteLine(page);
     }
 }
