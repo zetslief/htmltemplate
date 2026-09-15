@@ -9,4 +9,9 @@
   <ItemGroup>
     <PackageReference Include="TUnit" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\doctypehtml\DoctypeHtml.Parser\DoctypeHtml.Parser.csproj" />
+    <ProjectReference Include="..\HtmlT\HtmlT.csproj" />
+  </ItemGroup>
 </Project>

@@ -2,11 +2,18 @@
 
 namespace HtmlT;
 
-public class Component(string Name, string Content);
+public record Component(string Content);
 
-public class HtmlTemplate(ImmutableArray<Component> Components)
+public record HtmlTemplate(Dictionary<string, Component> components)
 {
     public string Render(string page)
+        => page;
+
+    public class Builder
     {
+        private readonly Dictionary<string, Component> _components = [];
+
+        public Builder AddComponent(string name, Component component) { _components[name] = component; return this; }
+        public HtmlTemplate Build() => new(_components);
     }
 }
